@@ -4,10 +4,14 @@ import com.atguigu.springcloud.entities.CommonResult;
 import com.atguigu.springcloud.entities.Payment;
 import com.atguigu.springcloud.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Description:
@@ -23,6 +27,9 @@ public class PaymentController {
 
     @Value("${server.port}")
     private String serverPort;
+
+    @Autowired
+    private DiscoveryClient discoveryClient;
 
 
     @PostMapping(value = "/payment/create")
@@ -48,5 +55,19 @@ public class PaymentController {
         }
     }
 
+    /**
+     * discovery 获取注册信息
+     *
+     * @return: java.lang.Object
+     **/
+    @GetMapping(value = "/payment/discovery")
+    public Object discovery() {
+
+        List<ServiceInstance> instances = discoveryClient.getInstances("CLOUD-PAYMENT-SERVICE");
+        instances.forEach(instance -> {
+            log.info("instance {} {}", instance.getHost(), instance.getPort());
+        });
+        return this.discoveryClient;
+    }
 
 }
